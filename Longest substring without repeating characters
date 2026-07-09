@@ -1,0 +1,18 @@
+int lengthOfLongestSubstring(char* s) {
+    int last_seen[256];
+    memset(last_seen, -1, sizeof(last_seen));
+    
+    int max_len = 0;
+    int start = 0;
+    
+    for (int end = 0; s[end] != '\0'; end++) {
+        unsigned char current_char = s[end];
+        if (last_seen[current_char] >= start) {
+            start = last_seen[current_char] + 1;
+        }
+        last_seen[current_char] = end;
+        max_len = MAX(max_len, end - start + 1);
+    }
+    
+    return max_len;
+}
