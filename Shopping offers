@@ -1,0 +1,57 @@
+#include <string.h>
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+int memo[1771562];
+int getHashKey(int* needs, int n) {
+    int key = 0;
+    for (int i = 0; i < n; i++) {
+        key = key * 11 + needs[i];
+    }
+    return key;
+}
+
+int dfs(int* price, int** special, int specialSize, int* needs, int n) {
+    int key = getHashKey(needs, n);
+    if (memo[key] != -1) {
+        return memo[key];
+    }
+    int min_cost = 0;
+    for (int i = 0; i < n; i++) {
+        min_cost += needs[i] * price[i];
+    }
+    for (int i = 0; i < specialSize; i++) {
+        int* offer = special[i];
+        int individual_offer_cost = 0;
+        for (int j = 0; j < n; j++) {
+            individual_offer_cost += offer[j] * price[j];
+        }
+        if (offer[n] >= individual_offer_cost) {
+            continue;
+        }
+
+        int is_valid = 1;
+        for (int j = 0; j < n; j++) {
+            if (needs[j] < offer[j]) {
+                is_valid = 0;
+                break;
+            }
+        }
+        if (is_valid) {
+            for (int j = 0; j < n; j++) {
+                needs[j] -= offer[j];
+            }
+
+            int cost_with_offer = offer[n] + dfs(price, special, specialSize, needs, n);
+            min_cost = MIN(min_cost, cost_with_offer);
+            for (int j = 0; j < n; j++) {
+                needs[j] += offer[j];
+            }
+        }
+    }
+    memo[key] = min_cost;
+    return min_cost;
+}
+
+int shoppingOffers(int* price, int priceSize, int** special, int specialSize, int* specialColSize, int* needs, int needsSize) {
+    memset(memo, -1, sizeof(memo));
+    return dfs(price, special, specialSize, needs, priceSize);
+}
