@@ -1,0 +1,52 @@
+#include <stdlib.h>
+typedef struct {
+    int val;
+    int min;
+} StackNode;
+
+typedef struct {
+    StackNode* data;
+    int topIndex;
+    int capacity;
+} MinStack;
+MinStack* minStackCreate() {
+    MinStack* obj = (MinStack*)malloc(sizeof(MinStack));
+    obj->capacity = 30000; 
+    obj->data = (StackNode*)malloc(obj->capacity * sizeof(StackNode));
+    obj->topIndex = -1;
+    return obj;
+}
+void minStackPush(MinStack* obj, int val) {
+    obj->topIndex++;
+    obj->data[obj->topIndex].val = val;
+    
+    if (obj->topIndex == 0) {
+        obj->data[obj->topIndex].min = val;
+    } else {
+        int currentMin = obj->data[obj->topIndex - 1].min;
+        obj->data[obj->topIndex].min = (val < currentMin) ? val : currentMin;
+    }
+}
+
+void minStackPop(MinStack* obj) {
+    if (obj->topIndex >= 0) {
+        obj->topIndex--;
+    }
+}
+int minStackTop(MinStack* obj) {
+    if (obj->topIndex >= 0) {
+        return obj->data[obj->topIndex].val;
+    }
+    return 0; 
+}
+int minStackGetMin(MinStack* obj) {
+    if (obj->topIndex >= 0) {
+        return obj->data[obj->topIndex].min;
+    }
+    return 0; 
+}
+void minStackFree(MinStack* obj) {
+    free(obj->data);
+    free(obj);
+}
+
