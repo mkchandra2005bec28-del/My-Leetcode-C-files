@@ -1,0 +1,125 @@
+#include <stdbool.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define HASH_SIZE 40009 
+
+typedef struct Node {
+    long long key;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* buckets[HASH_SIZE];
+} HashMap;
+
+long long get_key(int x, int y) {
+    unsigned long long ux = (unsigned int)x;
+    unsigned long long uy = (unsigned int)y;
+    return (long long)((ux << 32) | uy);
+}
+
+void toggle_point(HashMap* map, int x, int y) {
+    long long key = get_key(x, y);
+    int idx = llabs(key) % HASH_SIZE;
+    
+    Node* curr = map->buckets[idx];
+    Node* prev = NULL;
+    
+    while (curr != NULL) {
+        if (curr->key == key) {
+            if (prev == NULL) {
+                map->buckets[idx] = curr->next;
+            } else {
+                prev->next = curr->next;
+            }
+            free(curr);
+            return;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+    
+    Node* new_node = (Node*)malloc(sizeof(Node));
+    new_node->key = key;
+    new_node->next = map->buckets[idx];
+    map->buckets[idx] = new_node;
+}
+
+bool has_point(HashMap* map, int x, int y) {
+    long long key = get_key(x, y);
+    int idx = llabs(key) % HASH_SIZE;
+    Node* curr = map->buckets[idx];
+    while (curr != NULL) {
+        if (curr->key == key) return true;
+        curr = curr->next;
+    }
+    return false;
+}
+
+void free_map(HashMap* map) {
+    for (int i = 0; i < HASH_SIZE; i++) {
+        Node* curr = map->buckets[i];
+        while (curr != NULL) {
+            Node* temp = curr;
+            curr = curr->next;
+            free(temp);
+        }
+    }
+}
+
+bool isRectangleCover(int** rectangles, int rectanglesSize, int* rectanglesColSize) {
+    if (rectanglesSize == 0) return false;
+
+    int min_x = INT_MAX, min_y = INT_MAX;
+    int max_x = INT_MIN, max_y = INT_MIN;
+    long long total_area = 0;
+
+    HashMap map = { { NULL } };
+
+    for (int i = 0; i < rectanglesSize; i++) {
+        int x1 = rectangles[i][0];
+        int y1 = rectangles[i][1];
+        int x2 = rectangles[i][2];
+        int y2 = rectangles[i][3];
+
+        if (x1 < min_x) min_x = x1;
+        if (y1 < min_y) min_y = y1;
+        if (x2 > max_x) max_x = x2;
+        if (y2 > max_y) max_y = y2;
+
+        total_area += (long long)(x2 - x1) * (y2 - y1);
+
+        toggle_point(&map, x1, y1);
+        toggle_point(&map, x1, y2);
+        toggle_point(&map, x2, y1);
+        toggle_point(&map, x2, y2);
+    }
+
+    long long expected_area = (long long)(max_x - min_x) * (max_y - min_y);
+    if (total_area != expected_area) {
+        free_map(&map);
+        return false;
+    }
+
+    if (!has_point(&map, min_x, min_y) || 
+        !has_point(&map, min_x, max_y) || 
+        !has_point(&map, max_x, min_y) || 
+        !has_point(&map, max_x, max_y)) {
+        free_map(&map);
+        return false;
+    }
+
+    int leftover_points = 0;
+    for (int i = 0; i < HASH_SIZE; i++) {
+        Node* curr = map.buckets[i];
+        while (curr != NULL) {
+            leftover_points++;
+            curr = curr->next;
+        }
+    }
+
+    free_map(&map);
+    
+    return leftover_points == 4;
+}
