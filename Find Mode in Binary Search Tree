@@ -1,0 +1,49 @@
+
+int current_val = 0;
+int current_count = 0;
+int max_count = 0;
+int mode_count = 0;
+
+void handleValue(int val, int pass, int* result) {
+    if (current_count == 0 || val != current_val) {
+        current_val = val;
+        current_count = 1;
+    } else {
+        current_count++;
+    }
+
+    if (pass == 1) {
+        if (current_count > max_count) {
+            max_count = current_count;
+            mode_count = 1;
+        } else if (current_count == max_count) {
+            mode_count++;
+        }
+    } else {
+        if (current_count == max_count) {
+            result[mode_count++] = current_val;
+        }
+    }
+}
+
+void inorder(struct TreeNode* root, int pass, int* result) {
+    if (!root) return;
+    inorder(root->left, pass, result);
+    handleValue(root->val, pass, result);
+    inorder(root->right, pass, result);
+}
+
+int* findMode(struct TreeNode* root, int* returnSize) {
+    current_count = 0;
+    max_count = 0;
+    mode_count = 0;
+    inorder(root, 1, NULL);
+
+    int* result = (int*)malloc(mode_count * sizeof(int));
+    *returnSize = mode_count;
+    current_count = 0;
+    mode_count = 0;
+    inorder(root, 2, result);
+
+    return result;
+}
