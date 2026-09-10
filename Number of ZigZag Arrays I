@@ -1,0 +1,70 @@
+#include <stdlib.h>
+
+#define MOD 1000000007
+
+int zigZagArrays(int n, int l, int r) {
+    int m = r - l + 1;
+
+    long long *up = calloc(m + 2, sizeof(long long));
+    long long *down = calloc(m + 2, sizeof(long long));
+    long long *prefixDown = calloc(m + 2, sizeof(long long));
+    long long *suffixUp = calloc(m + 3, sizeof(long long));
+    long long *newUp = calloc(m + 2, sizeof(long long));
+    long long *newDown = calloc(m + 2, sizeof(long long));
+
+    // Arrays of length 2.
+    //
+    // up[i]   = number of arrays ending at i with last step increasing
+    // down[i] = number of arrays ending at i with last step decreasing
+    //
+    // Values are represented by indices 1..m.
+    for (int i = 1; i <= m; i++) {
+        up[i] = i - 1;
+        down[i] = m - i;
+    }
+
+    for (int len = 3; len <= n; len++) {
+
+        // Prefix sums of down.
+        prefixDown[0] = 0;
+        for (int i = 1; i <= m; i++) {
+            prefixDown[i] = (prefixDown[i - 1] + down[i]) % MOD;
+        }
+
+        // Suffix sums of up.
+        suffixUp[m + 1] = 0;
+        for (int i = m; i >= 1; i--) {
+            suffixUp[i] = (suffixUp[i + 1] + up[i]) % MOD;
+        }
+
+        for (int i = 1; i <= m; i++) {
+            // Current value is greater than previous value.
+            // Previous step must therefore have been decreasing.
+            newUp[i] = prefixDown[i - 1];
+
+            // Current value is smaller than previous value.
+            // Previous step must therefore have been increasing.
+            newDown[i] = suffixUp[i + 1];
+        }
+
+        for (int i = 1; i <= m; i++) {
+            up[i] = newUp[i];
+            down[i] = newDown[i];
+        }
+    }
+
+    long long ans = 0;
+
+    for (int i = 1; i <= m; i++) {
+        ans = (ans + up[i] + down[i]) % MOD;
+    }
+
+    free(up);
+    free(down);
+    free(prefixDown);
+    free(suffixUp);
+    free(newUp);
+    free(newDown);
+
+    return (int)ans;
+}
