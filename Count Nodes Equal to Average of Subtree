@@ -1,0 +1,31 @@
+
+int count = 0;
+int dfs(struct TreeNode* root, int* nodeCount) {
+    if (root == NULL) {
+        *nodeCount = 0;
+        return 0;
+    }
+
+    int leftCount, rightCount;
+
+    int leftSum = dfs(root->left, &leftCount);
+    int rightSum = dfs(root->right, &rightCount);
+
+    int sum = root->val + leftSum + rightSum;
+    int totalCount = 1 + leftCount + rightCount;
+    if (root->val == sum / totalCount) {
+        count++;
+    }
+
+    *nodeCount = totalCount;
+    return sum;
+}
+
+int averageOfSubtree(struct TreeNode* root) {
+    count = 0;
+
+    int nodeCount;
+    dfs(root, &nodeCount);
+
+    return count;
+}
