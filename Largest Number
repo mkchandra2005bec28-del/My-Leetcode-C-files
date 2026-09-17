@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int compare(const void *a, const void *b) {
+    char ab[25];
+    char ba[25];
+
+    sprintf(ab, "%d%d", *(int *)a, *(int *)b);
+    sprintf(ba, "%d%d", *(int *)b, *(int *)a);
+
+    return strcmp(ba, ab);
+}
+
+char* largestNumber(int* nums, int numsSize) {
+    char **str = malloc(numsSize * sizeof(char *));
+
+    for (int i = 0; i < numsSize; i++) {
+        str[i] = malloc(12 * sizeof(char));
+        sprintf(str[i], "%d", nums[i]);
+    }
+    for (int i = 0; i < numsSize - 1; i++) {
+        for (int j = i + 1; j < numsSize; j++) {
+            char ab[25], ba[25];
+
+            sprintf(ab, "%s%s", str[i], str[j]);
+            sprintf(ba, "%s%s", str[j], str[i]);
+
+            if (strcmp(ab, ba) < 0) {
+                char *temp = str[i];
+                str[i] = str[j];
+                str[j] = temp;
+            }
+        }
+    }
+
+    if (strcmp(str[0], "0") == 0) {
+        char *ans = malloc(2);
+        ans[0] = '0';
+        ans[1] = '\0';
+
+        for (int i = 0; i < numsSize; i++) {
+            free(str[i]);
+        }
+        free(str);
+
+        return ans;
+    }
+
+    int totalLength = 0;
+
+    for (int i = 0; i < numsSize; i++) {
+        totalLength += strlen(str[i]);
+    }
+
+    char *ans = malloc(totalLength + 1);
+    ans[0] = '\0';
+
+    for (int i = 0; i < numsSize; i++) {
+        strcat(ans, str[i]);
+        free(str[i]);
+    }
+
+    free(str);
+
+    return ans;
+}
