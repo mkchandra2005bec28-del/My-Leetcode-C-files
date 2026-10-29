@@ -1,0 +1,52 @@
+#include <string.h>
+#include <stdbool.h>
+#include <limits.h>
+
+int minCut(char* s) {
+    int n = strlen(s);
+    if (n <= 1) return 0;
+
+    int dp[n];
+    bool isPalindrome[n][n];
+
+    
+    for (int i = 0; i < n; i++) {
+        dp[i] = i; 
+        for (int j = 0; j < n; j++) {
+            isPalindrome[i][j] = false;
+        }
+    }
+
+
+    for (int i = 0; i < n; i++) {
+        isPalindrome[i][i] = true;
+    }
+
+    for (int len = 2; len <= n; len++) {
+        for (int i = 0; i <= n - len; i++) {
+            int j = i + len - 1;
+            if (s[i] == s[j]) {
+                if (len == 2 || isPalindrome[i + 1][j - 1]) {
+                    isPalindrome[i][j] = true;
+                }
+            }
+        }
+    }
+
+
+    for (int i = 0; i < n; i++) {
+        if (isPalindrome[0][i]) {
+            dp[i] = 0; 
+        } else {
+            for (int j = 1; j <= i; j++) {
+                if (isPalindrome[j][i]) {
+                    if (dp[j - 1] + 1 < dp[i]) {
+                        dp[i] = dp[j - 1] + 1;
+                    }
+                }
+            }
+        }
+    }
+
+    return dp[n - 1];
+}
